@@ -7,6 +7,8 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 
@@ -59,18 +61,46 @@ public class Utils {
 		writer.write(fileContent);
 		writer.close();
 	}
-	
+
 	public static boolean validateFileName(String fileName) {
-	    return fileName.matches("^[^.\\\\/:*?\"<>|]?[^\\\\/:*?\"<>|]*") 
-	    && getValidFileName(fileName).length()>0;
+		return fileName.matches("^[^.\\\\/:*?\"<>|]?[^\\\\/:*?\"<>|]*")
+				&& getValidFileName(fileName).length() > 0;
 	}
 
 	public static String getValidFileName(String fileName) {
-	    String newFileName = fileName.replaceAll("^[.\\\\/:*?\"<>|]?[\\\\/:*?\"<>|]*", "");
-	    if(newFileName.length()==0)
-	        throw new IllegalStateException(
-	                "File Name " + fileName + " results in a empty fileName!");
-	    return newFileName;
+		String newFileName = fileName.replaceAll(
+				"^[.\\\\/:*?\"<>|]?[\\\\/:*?\"<>|]*", "");
+		if (newFileName.length() == 0)
+			throw new IllegalStateException("File Name " + fileName
+					+ " results in a empty fileName!");
+		return newFileName;
+	}
+
+	public static void mergeTasks(Object obj, Object update)
+			throws NoSuchMethodException, SecurityException,
+			IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException {
+		if (!obj.getClass().isAssignableFrom(update.getClass())) {
+			return;
+		}
+
+		Method[] methods = obj.getClass().getMethods();
+
+		for (Method fromMethod : methods) {
+			if (fromMethod.getDeclaringClass().equals(obj.getClass())
+					&& fromMethod.getName().startsWith("get")) {
+
+				String fromName = fromMethod.getName();
+				String toName = fromName.replace("get", "set");
+
+				Method toMetod = obj.getClass().getMethod(toName,
+						fromMethod.getReturnType());
+				Object value = fromMethod.invoke(update, (Object[]) null);
+				if (value != null) {
+					toMetod.invoke(obj, value);
+				}
+			}
+		}
 	}
 
 }

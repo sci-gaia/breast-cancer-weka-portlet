@@ -3,6 +3,7 @@ package it.dfa.unict;
 import it.dfa.unict.pojo.AppInput;
 import it.dfa.unict.pojo.Task;
 
+import java.io.File;
 import java.io.IOException;
 
 import javax.ws.rs.core.MediaType;
@@ -17,10 +18,14 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
+import com.sun.jersey.multipart.FormDataMultiPart;
+import com.sun.jersey.multipart.file.FileDataBodyPart;
 
 public class FutureGatewayClient {
 
+	// TODO This should be replaced with a value passed from the portlet
 	private String fgEndpoint = "http://151.97.41.48:8888";
+	// TODO This should be replaced with a value passed from the portlet
 	private String fgApiversion = "v1.0";
 	private WebResource apiResource;
 	private Client client;
@@ -45,35 +50,6 @@ public class FutureGatewayClient {
 
 	public void setApiResource(WebResource apiResource) {
 		this.apiResource = apiResource;
-	}
-
-	public static void main(String[] args) {
-		try {
-
-			Client client = Client.create();
-
-			WebResource webResource = client
-					.resource("http://151.97.41.48:8888/v1.0/tasks?user=mtorrisi");
-
-			ClientResponse response = webResource.accept("application/json")
-					.get(ClientResponse.class);
-
-			if (response.getStatus() != 200) {
-				throw new RuntimeException("Failed : HTTP error code : "
-						+ response.getStatus());
-			}
-
-			String output = response.getEntity(String.class);
-
-			System.out.println("Output from Server .... \n");
-			System.out.println(output);
-
-		} catch (Exception e) {
-
-			e.printStackTrace();
-
-		}
-
 	}
 
 	public String getFgEndpoint() {
@@ -120,5 +96,29 @@ public class FutureGatewayClient {
 		}
 
 		return response.getEntity(Task.class);
+	}
+
+	public String uploadFile(String uploadPath, String[] inputSandbox) {
+		FormDataMultiPart multiPart = new FormDataMultiPart();
+		for (String path : inputSandbox) {
+			File fileToUpload = new File(path);
+			if (fileToUpload != null) {
+				multiPart.bodyPart(new FileDataBodyPart("file[]", fileToUpload,
+						MediaType.APPLICATION_OCTET_STREAM_TYPE));
+			}
+		}
+		
+		System.out.println("*****" +uploadPath.replace("/v1.0", ""));
+		
+		ClientResponse response = apiResource.path(uploadPath.replace("/v1.0", ""))
+				.accept(MediaType.APPLICATION_JSON)
+				.type(MediaType.MULTIPART_FORM_DATA_TYPE)
+				.post(ClientResponse.class, multiPart);
+		if (response.getStatus() != 200) {
+			throw new RuntimeException("Failed : HTTP error code : "
+					+ response.getStatus());
+		}
+
+		return response.getEntity(String.class);
 	}
 }

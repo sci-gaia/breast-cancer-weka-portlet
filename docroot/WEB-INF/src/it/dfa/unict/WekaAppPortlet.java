@@ -2,11 +2,14 @@ package it.dfa.unict;
 
 import it.dfa.unict.pojo.AppInput;
 import it.dfa.unict.pojo.InputFile;
+import it.dfa.unict.pojo.Link;
+import it.dfa.unict.pojo.Task;
 import it.dfa.unict.util.Constants;
 import it.dfa.unict.util.Utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,10 +67,15 @@ public class WekaAppPortlet extends MVCPortlet {
 	 * @param actionResponse
 	 * @throws IOException
 	 * @throws PortletException
+	 * @throws InvocationTargetException 
+	 * @throws IllegalArgumentException 
+	 * @throws IllegalAccessException 
+	 * @throws SecurityException 
+	 * @throws NoSuchMethodException 
 	 */
 	@ProcessAction(name = "submit")
 	public void submit(ActionRequest actionRequest,
-			ActionResponse actionResponse) throws IOException, PortletException {
+			ActionResponse actionResponse) throws IOException, PortletException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
 		AppInput appInput = new AppInput();
 
@@ -103,30 +111,47 @@ public class WekaAppPortlet extends MVCPortlet {
 		if (uploadedFile != null && uploadedFile.length() == 0) {
 			SessionErrors.add(actionRequest, "empty-file");
 		} else {
-			String[] inputSandbox;
-			
+			String[] inputSandbox = null;
+
 			List<InputFile> inputFiles = new ArrayList<InputFile>();
 			if (uploadedFile != null) {
 				InputFile inputFile = new InputFile();
 				inputFile.setName(uploadedFile.getName());
-				
+
 				inputFiles.add(inputFile);
 				// Path to the uploaded file in the Liferay server
 				inputSandbox = new String[] { uploadedFile.getAbsolutePath() };
 			}
 
 			appInput.setInputFiles(inputFiles);
-			
+
 			String joblabel = ParamUtil.getString(uploadRequest, "jobLabel");
 
-//			appInput.setJobLabel(joblabel);
+			// appInput.setJobLabel(joblabel);
 
 			_log.info(appInput);
 
 			FutureGatewayClient client = new FutureGatewayClient();
+
 			// 1. Create FG task
-			client.createTask(appInput, username);
-			
+			Task t = client.createTask(appInput, username);
+			_log.info(t);
+			if (t.getStatus().equals("WAITING") && inputSandbox != null) {
+				// 2. upload input file
+				String uploadPath = "";
+				List<Link> links = t.getLinks();
+				for (Link link : links) {
+					if(link.getRel().equals("input")){
+						uploadPath = link.getHref();
+						break;								
+					}
+				}
+				String t2 = client.uploadFile(uploadPath, inputSandbox);
+				_log.info(t2);
+//				Utils.mergeTasks(t, t2);
+			} else {
+				// TODO Manage this condition
+			}
 
 			// List<AppInfrastructureInfo> enabledInfras = Utils
 			// .getEnabledInfrastructureInfo(JSONAppInfras);
