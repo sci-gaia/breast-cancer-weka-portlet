@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
@@ -32,7 +31,6 @@ import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
-import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.model.User;
@@ -67,15 +65,18 @@ public class WekaAppPortlet extends MVCPortlet {
 	 * @param actionResponse
 	 * @throws IOException
 	 * @throws PortletException
-	 * @throws InvocationTargetException 
-	 * @throws IllegalArgumentException 
-	 * @throws IllegalAccessException 
-	 * @throws SecurityException 
-	 * @throws NoSuchMethodException 
+	 * @throws InvocationTargetException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 * @throws SecurityException
+	 * @throws NoSuchMethodException
 	 */
 	@ProcessAction(name = "submit")
 	public void submit(ActionRequest actionRequest,
-			ActionResponse actionResponse) throws IOException, PortletException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+			ActionResponse actionResponse) throws IOException,
+			PortletException, NoSuchMethodException, SecurityException,
+			IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException {
 
 		AppInput appInput = new AppInput();
 
@@ -85,7 +86,7 @@ public class WekaAppPortlet extends MVCPortlet {
 		appInput.setApplication(8);
 
 		// Just a description of the job, could passed from the JSP maybe.
-		appInput.setDescription("weka@DFA_UNICT rocci");
+		appInput.setDescription("W");
 
 		PortletPreferences preferences = actionRequest.getPreferences();
 
@@ -95,13 +96,12 @@ public class WekaAppPortlet extends MVCPortlet {
 
 		SimpleDateFormat dateFormat = new SimpleDateFormat(Constants.TS_FORMAT);
 		String timestamp = dateFormat.format(Calendar.getInstance().getTime());
-		// appInput.setTimestamp(timestamp);
 
 		ThemeDisplay themeDisplay = (ThemeDisplay) actionRequest
 				.getAttribute(WebKeys.THEME_DISPLAY);
 		User user = themeDisplay.getUser();
 		String username = user.getScreenName();
-		// appInput.setUsername(username);
+
 		UploadPortletRequest uploadRequest = PortalUtil
 				.getUploadPortletRequest(actionRequest);
 
@@ -125,9 +125,11 @@ public class WekaAppPortlet extends MVCPortlet {
 
 			appInput.setInputFiles(inputFiles);
 
-			String joblabel = ParamUtil.getString(uploadRequest, "jobLabel");
-
-			// appInput.setJobLabel(joblabel);
+			// this should be passed from the UI
+			appInput.getArguments().add("weka.classifiers.bayes.NaiveBayes");
+			for (InputFile inputFile : inputFiles) {
+				appInput.getArguments().add(inputFile.getName());
+			}
 
 			_log.info(appInput);
 
@@ -141,32 +143,24 @@ public class WekaAppPortlet extends MVCPortlet {
 				String uploadPath = "";
 				List<Link> links = t.getLinks();
 				for (Link link : links) {
-					if(link.getRel().equals("input")){
+					if (link.getRel().equals("input")) {
 						uploadPath = link.getHref();
-						break;								
+						break;
 					}
 				}
 				String t2 = client.uploadFile(uploadPath, inputSandbox);
 				_log.info(t2);
-//				Utils.mergeTasks(t, t2);
+
+				/*
+				 * TODO Check the FG response to see if the file was correctly
+				 * uploaded --> "gestatus": "triggered" in the respose notify
+				 * user that task was correctly submitted and he can check
+				 * status on my-jobs page
+				 */
 			} else {
 				// TODO Manage this condition
 			}
 
-			// List<AppInfrastructureInfo> enabledInfras = Utils
-			// .getEnabledInfrastructureInfo(JSONAppInfras);
-			//
-			// if (enabledInfras.size() > 0) {
-			// InfrastructureInfo infrastructureInfo[] = Utils
-			// .convertAppInfrastructureInfo(enabledInfras);
-			//
-			// submitJob(appPrefs, appInput, infrastructureInfo);
-			//
-			// PortalUtil.copyRequestParameters(actionRequest, actionResponse);
-			// actionResponse.setRenderParameter("jobLabel", joblabel);
-			// actionResponse
-			// .setRenderParameter("jspPage", "/jsps/submit.jsp");
-			// }
 		}
 
 		// Hide default Liferay success/error messages
@@ -175,23 +169,6 @@ public class WekaAppPortlet extends MVCPortlet {
 		LiferayPortletConfig liferayPortletConfig = (LiferayPortletConfig) portletConfig;
 		SessionMessages.add(actionRequest, liferayPortletConfig.getPortletId()
 				+ SessionMessages.KEY_SUFFIX_HIDE_DEFAULT_ERROR_MESSAGE);
-	}
-
-	/**
-	 * Method responsible of job submission.
-	 * 
-	 * @param preferences
-	 *            Application preferences object.
-	 * @param appInput
-	 *            An object consists of view input fields values and other job
-	 *            input parameters.
-	 * @param enabledInfrastructures
-	 *            List of enabled infrastructures.
-	 */
-	private void submitJob(AppPreferences preferences, AppInput appInput) {
-
-		_log.info("Submit not implemented yet!!!");
-
 	}
 
 	/**
