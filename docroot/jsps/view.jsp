@@ -1,3 +1,4 @@
+<%@page import="java.io.File"%>
 <%@page import="javax.portlet.WindowState"%>
 <%@page import="com.liferay.portal.kernel.log.Log"%>
 <%@page import="it.dfa.unict.WekaAppPortlet"%>
@@ -23,7 +24,10 @@
 		isConfigured = false;
 	}
 	String tabsName = "Preprocessing, Outputs";
+	String fileName = "";
 	if (filePath != null && !filePath.isEmpty()) {
+		File f = new File(filePath);
+		fileName = f.getName();
 		tabsName = "Classify, Outputs";
 	}
 %>
@@ -41,8 +45,7 @@
 
 <c:choose>
 	<c:when test="<%=isConfigured%>">
-		<liferay-ui:tabs names="<%=tabsName %>"
-			refresh="<%=false%>">
+		<liferay-ui:tabs names="<%=tabsName%>" refresh="<%=false%>">
 			<c:choose>
 				<c:when test="<%=filePath == null || filePath.isEmpty()%>">
 					<liferay-ui:section>
@@ -73,16 +76,25 @@
 				<c:otherwise>
 					<liferay-ui:section>
 						<portlet:actionURL name="classify" var="classify" />
-						<aui:form action="<%=classify%>" method="post"
-							enctype="multipart/form-data">
+						<aui:form action="<%=classify%>" method="post">
 							<aui:fieldset label="Classify">
-								<aui:input name="file" type="hidden" value="<%=filePath%>" />
-								<aui:input name="filter" type="file" value="<%=filter%>" />
+								<p>
+									From the uploaded <b><%=fileName%></b> file please select
+									available algorithm and experiment type to be used for Mining
+								</p>
+								<h3>Test type</h3>
+								<hr />
+								<aui:input name="Crossfield validation" value="test"
+									type="radio" />
+
+								<aui:input name="training set" type="radio" value="test" />
+								<hr />
 								<aui:select label="Classifier" name="clasify">
 									<aui:option label="Naive Bayes" value="naivebayes" />
 								</aui:select>
 								<br />
-								<h3>to be completed...</h3>
+
+								<aui:button type="submit" value="submit" />
 							</aui:fieldset>
 						</aui:form>
 					</liferay-ui:section>
