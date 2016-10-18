@@ -2,6 +2,7 @@ package it.dfa.unict;
 
 import it.dfa.unict.pojo.AppInput;
 import it.dfa.unict.pojo.Task;
+import it.dfa.unict.util.Constants;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,29 +24,25 @@ import com.sun.jersey.multipart.file.FileDataBodyPart;
 
 public class FutureGatewayClient {
 
-	// TODO This should be replaced with a value passed from the portlet
-	private String fgEndpoint = "http://151.97.41.48:8888";
-	// TODO This should be replaced with a value passed from the portlet
-	private String fgApiversion = "v1.0";
+	private String fgEndpoint;
+	private String fgApiversion;
 	private WebResource apiResource;
 	private Client client;
-
-	public FutureGatewayClient() {
+		
+	public FutureGatewayClient(String fgHost, int fgPort, String fgAPIVersion) {
 
 		ClientConfig clientConfig = new DefaultClientConfig();
 		clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING,
 				Boolean.TRUE);
 		this.client = Client.create(clientConfig);
+		this.setFgEndpoint(fgHost, fgPort);
+		this.fgApiversion = fgAPIVersion;
 		this.apiResource = this.client
-				.resource(fgEndpoint + "/" + fgApiversion);
+				.resource(this.fgEndpoint + "/" + this.fgApiversion);
 	}
 
 	public Client getClient() {
 		return client;
-	}
-
-	public void setClient(Client client) {
-		this.client = client;
 	}
 
 	public void setApiResource(WebResource apiResource) {
@@ -57,9 +54,13 @@ public class FutureGatewayClient {
 	}
 
 	public void setFgEndpoint(String fgEndpoint) {
-		this.fgEndpoint = fgEndpoint;
+		this.setFgEndpoint(fgEndpoint, Constants.HTTP_PORT);
 	}
 
+	public void setFgEndpoint(String fgEndpoint, int fgPort) {
+		this.fgEndpoint = "http://" + fgEndpoint + ":" + fgPort;
+	}
+	
 	public String getFgApiversion() {
 		return fgApiversion;
 	}
@@ -80,7 +81,7 @@ public class FutureGatewayClient {
 			throw new RuntimeException("Failed : HTTP error code : "
 					+ response.getStatus());
 		}
-
+		
 		return response.getEntity(Task.class);
 
 	}
@@ -91,6 +92,7 @@ public class FutureGatewayClient {
 				.accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
 
 		if (response.getStatus() != 200) {
+			System.out.println("*****" + apiResource);
 			throw new RuntimeException("Failed : HTTP error code : "
 					+ response.getStatus());
 		}

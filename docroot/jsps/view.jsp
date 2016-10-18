@@ -1,50 +1,112 @@
-<%@page import="com.liferay.portal.kernel.util.ParamUtil"%>
-<%@ taglib uri="http://java.sun.com/portlet_2_0" prefix="portlet"%>
-<%@ taglib uri="http://alloy.liferay.com/tld/aui" prefix="aui"%>
-<%@ taglib uri="http://liferay.com/tld/ui" prefix="liferay-ui"%>
+<%@page import="javax.portlet.WindowState"%>
+<%@page import="com.liferay.portal.kernel.log.Log"%>
+<%@page import="it.dfa.unict.WekaAppPortlet"%>
+<%@page import="com.liferay.portal.kernel.log.LogFactoryUtil"%>
+<%@page import="java.util.Calendar"%>
+<%@page import="it.dfa.unict.util.Constants"%>
+<%@page import="java.text.SimpleDateFormat"%>
+<%@include file="../init.jsp"%>
 
-<portlet:defineObjects />
-<h2>WEKA Application</h2>
-<p>
-	<aui:a href="http://www.cs.waikato.ac.nz/ml/weka/" label="WEKA"></aui:a>
-	is a collection of machine learning algorithms for data mining tasks.
-	The algorithms can either be applied directly to a dataset or called
-	from your own Java code. Weka contains tools for data pre-processing,
-	classification, regression, clustering, association rules, and
-	visualization.
-<h3>Upload file</h3>
-<hr />
-<p></p>
 
-<portlet:actionURL name="submit" var="uploadFileURL" />
-<aui:form action="<%=uploadFileURL%>" method="post"
-	enctype="multipart/form-data">
+<%
+	String filePath = ParamUtil.getString(renderRequest, "filePath", "");
+	String filter = ParamUtil.getString(renderRequest, "filter", "");
 
-	<aui:input name="fileupload" title="Local file upload" type="file" />
+	PortletPreferences preferences = renderRequest.getPreferences();
 
-	<!-- <aui:input name="url" title="URL" type="text" /> -->
+	String JSONAppPrefs = GetterUtil.getString(preferences.getValue(
+	Constants.APP_PREFERENCES, null));
 
-	<p>From the uploaded file please select available algorithm and
-		experiment type to be used for Mining</p>
-	<h3>Test type</h3>
-	<hr />
+	boolean isConfigured = true;
 
-	<aui:select label="Test" name="test">
-		<aui:option label="Cross-Validation" value="crossValidation"></aui:option>
-	</aui:select>
-	<h3>Classifiers</h3>
-	<hr />
-	<aui:select label="Classifier" name="clasify">
-		<aui:option label="Naive Bayes" value="naivebayes"></aui:option>
-	</aui:select>
-	<br />
+	if (JSONAppPrefs == null || JSONAppPrefs.isEmpty()) {
+		isConfigured = false;
+	}
+	String tabsName = "Preprocessing, Outputs";
+	if (filePath != null && !filePath.isEmpty()) {
+		tabsName = "Classify, Outputs";
+	}
+%>
 
-	<aui:button type="submit" value="submit"></aui:button>
+<aui:layout>
+	<aui:column columnWidth="50" first="true">
+		<img src="<%=request.getContextPath()%>/images/AppLogo.png"
+			height="50%" width="50%" />
+	</aui:column>
+	<aui:column columnWidth="50" last="true">
+		<%=LanguageUtil.get(portletConfig,
+							themeDisplay.getLocale(), "brief-description")%>
+	</aui:column>
+</aui:layout>
 
-</aui:form>
-<!-- 
-<portlet:renderURL var="clasfy">
-<portlet:param name="mvcPath" value="/html/wekaapp/clasfy.jsp"></portlet:param>
-</portlet:renderURL>
-<a href="<%=clasfy%>">COntinue</a>
- -->
+<c:choose>
+	<c:when test="<%=isConfigured%>">
+		<liferay-ui:tabs names="<%=tabsName %>"
+			refresh="<%=false%>">
+			<c:choose>
+				<c:when test="<%=filePath == null || filePath.isEmpty()%>">
+					<liferay-ui:section>
+						<liferay-ui:error key="wrong-app-id" message="wrong-app-id" />
+						<liferay-ui:error key="wrong-fg-host" message="wrong-fg-host" />
+
+						<portlet:actionURL name="uploadFile" var="uploadFileURL" />
+						<aui:form action="<%=uploadFileURL%>" method="post"
+							enctype="multipart/form-data">
+							<aui:fieldset label="Preprocessing">
+								<aui:input name="fileupload" label="Upload"
+									title="Local file upload" type="file">
+									<aui:validator name="acceptFiles">'data,csv,arff'</aui:validator>
+								</aui:input>
+
+								<aui:select label="filters" name="filters">
+									<aui:option label="Select filter ..." value="" />
+									<aui:option label="Missing values"
+										value="weka.filters.unsupervised.attribute.ReplaceMissingValues" />
+								</aui:select>
+								<br />
+
+								<aui:button type="hidden" value="Continue" name="continue" />
+							</aui:fieldset>
+						</aui:form>
+					</liferay-ui:section>
+				</c:when>
+				<c:otherwise>
+					<liferay-ui:section>
+						<portlet:actionURL name="classify" var="classify" />
+						<aui:form action="<%=classify%>" method="post"
+							enctype="multipart/form-data">
+							<aui:fieldset label="Classify">
+								<aui:input name="file" type="hidden" value="<%=filePath%>" />
+								<aui:input name="filter" type="file" value="<%=filter%>" />
+								<aui:select label="Classifier" name="clasify">
+									<aui:option label="Naive Bayes" value="naivebayes" />
+								</aui:select>
+								<br />
+								<h3>to be completed...</h3>
+							</aui:fieldset>
+						</aui:form>
+					</liferay-ui:section>
+				</c:otherwise>
+			</c:choose>
+			<liferay-ui:section>
+				<h3>Outputs to be implemented...</h3>
+			</liferay-ui:section>
+		</liferay-ui:tabs>
+	</c:when>
+	<c:otherwise>
+		<div class="portlet-msg-info">
+			<liferay-ui:message key="check-configuration" />
+		</div>
+	</c:otherwise>
+</c:choose>
+
+<aui:script>
+	AUI().use('node', function(A) {
+		console.log("CIAO");
+		A.one('#<portlet:namespace/>fileupload').on('change', function(event) {
+			A.one('#<portlet:namespace/>continue').set('type', 'submit');
+		});
+	});
+
+	
+</aui:script>

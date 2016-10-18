@@ -17,16 +17,19 @@
 
 <%
 	PortletPreferences preferences = null;
-	
-	String portletResource = ParamUtil.getString(request, "portletResource");
-		
+
+	String portletResource = ParamUtil.getString(request,
+			"portletResource");
+
 	if (Validator.isNotNull(portletResource)) {
-    	preferences = PortletPreferencesFactoryUtil.getPortletSetup(request, portletResource);
+		preferences = PortletPreferencesFactoryUtil.getPortletSetup(
+				request, portletResource);
 	}
 
-	String JSONAppPrefs = GetterUtil.getString(preferences
-		.getValue(Constants.APP_PREFERENCES, null));
-	AppPreferences appPreferences = Utils.getAppPreferences(JSONAppPrefs);
+	String JSONAppPrefs = GetterUtil.getString(preferences.getValue(
+			Constants.APP_PREFERENCES, null));
+	AppPreferences appPreferences = Utils
+			.getAppPreferences(JSONAppPrefs);
 %>
 
 <liferay-portlet:actionURL portletConfiguration="true"
@@ -62,8 +65,9 @@
 
 				<aui:input type="text" name="fgPort" id="fgPortId"
 					label="Futuregateway port:" size="60"
-					value="<%=appPreferences.getFgPort()%>">
-					<aui:validator name="required" />
+					value="<%=(appPreferences.getFgPort() == Constants.HTTP_PORT || appPreferences
+										.getFgPort() == 0) ? ""
+										: appPreferences.getFgPort()%>">
 					<aui:validator name="digits" errorMessage="port-number" />
 				</aui:input>
 
@@ -82,8 +86,8 @@
 
 				<liferay-ui:success key="pilot-update-success"
 					message="pilot-update-success" />
-<%-- 				<aui:button id="pilot" name="piltot_btn" value="Edit pilot script" --%>
-<%-- 					onClick="<%= pilotScriptUrl %>" /> --%>
+				<%-- <aui:button id="pilot" name="piltot_btn" value="Edit pilot script" --%>
+				<%-- onClick="<%= pilotScriptUrl %>" /> --%>
 			</aui:column>
 
 		</aui:layout>

@@ -2,7 +2,6 @@ package it.dfa.unict;
 
 import it.dfa.unict.pojo.AppInput;
 import it.dfa.unict.pojo.InputFile;
-import it.dfa.unict.pojo.Link;
 import it.dfa.unict.pojo.Task;
 import it.dfa.unict.util.Constants;
 import it.dfa.unict.util.Utils;
@@ -31,6 +30,7 @@ import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
+import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.model.User;
@@ -56,6 +56,51 @@ public class WekaAppPortlet extends MVCPortlet {
 				+ "WEB-INF/job/" + getInitParameter("pilot-script");
 	}
 
+	@ProcessAction(name = "uploadFile")
+	public void uploadFile(ActionRequest actionRequest,
+			ActionResponse actionResponse) {
+		ThemeDisplay themeDisplay = (ThemeDisplay) actionRequest
+				.getAttribute(WebKeys.THEME_DISPLAY);
+		User user = themeDisplay.getUser();
+		String username = user.getScreenName();
+
+		UploadPortletRequest uploadRequest = PortalUtil
+				.getUploadPortletRequest(actionRequest);
+		SimpleDateFormat dateFormat = new SimpleDateFormat(Constants.TS_FORMAT);
+		String timestamp = dateFormat.format(Calendar.getInstance().getTime());
+		try {
+
+			File uploadedFile = processInputFile(uploadRequest, username,
+					timestamp);
+			if (uploadedFile != null && uploadedFile.length() == 0) {
+				SessionErrors.add(actionRequest, "empty-file");
+			} else {
+				InputFile inputFile = new InputFile();
+				inputFile.setName(uploadedFile.getName());
+
+				// Path to the uploaded file in the Liferay server
+				String filePath = uploadedFile.getAbsolutePath();
+
+				_log.debug("PATH: " + filePath);
+
+				PortalUtil.copyRequestParameters(actionRequest, actionResponse);
+				actionResponse.setRenderParameter("filePath", filePath);
+				actionResponse.setRenderParameter("filter",
+						ParamUtil.getString(uploadRequest, "filters"));
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// Hide default Liferay success/error messages
+		PortletConfig portletConfig = (PortletConfig) actionRequest
+				.getAttribute(JavaConstants.JAVAX_PORTLET_CONFIG);
+		LiferayPortletConfig liferayPortletConfig = (LiferayPortletConfig) portletConfig;
+		SessionMessages.add(actionRequest, liferayPortletConfig.getPortletId()
+				+ SessionMessages.KEY_SUFFIX_HIDE_DEFAULT_ERROR_MESSAGE);
+	}
+
 	/**
 	 * Processes the 'multipart/form-data' form uploading file, gets the jobs
 	 * label finally submits job towards a list of enabled DCI specified in the
@@ -70,118 +115,119 @@ public class WekaAppPortlet extends MVCPortlet {
 	 * @throws IllegalAccessException
 	 * @throws SecurityException
 	 * @throws NoSuchMethodException
+	 * @ProcessAction(name = "submit") public void submit(ActionRequest
+	 *                     actionRequest, ActionResponse actionResponse) throws
+	 *                     IOException, PortletException, NoSuchMethodException,
+	 *                     SecurityException, IllegalAccessException,
+	 *                     IllegalArgumentException, InvocationTargetException {
+	 * 
+	 *                     PortletPreferences preferences =
+	 *                     actionRequest.getPreferences();
+	 * 
+	 *                     String JSONAppPrefs =
+	 *                     GetterUtil.getString(preferences.getValue(
+	 *                     Constants.APP_PREFERENCES, null));
+	 *                     _log.info(JSONAppPrefs); AppPreferences appPrefs =
+	 *                     Utils.getAppPreferences(JSONAppPrefs);
+	 * 
+	 *                     _log.debug(appPrefs);
+	 * 
+	 *                     if (appPrefs.getApplicationId() <= 0) {
+	 *                     SessionErrors.add(actionRequest, "wrong-app-id");
+	 * 
+	 *                     } else if
+	 *                     (Validator.isIPAddress(appPrefs.getFgHost()) ||
+	 *                     Validator.isHostName(appPrefs.getFgHost())) {
+	 * 
+	 *                     AppInput appInput = new AppInput();
+	 *                     appInput.setApplication(appPrefs.getApplicationId());
+	 * 
+	 *                     // Just a description of the job, could passed from
+	 *                     the JSP maybe.
+	 *                     appInput.setDescription("WEKA Application");
+	 * 
+	 *                     SimpleDateFormat dateFormat = new SimpleDateFormat(
+	 *                     Constants.TS_FORMAT); String timestamp =
+	 *                     dateFormat.format(Calendar.getInstance() .getTime());
+	 * 
+	 *                     ThemeDisplay themeDisplay = (ThemeDisplay)
+	 *                     actionRequest .getAttribute(WebKeys.THEME_DISPLAY);
+	 *                     User user = themeDisplay.getUser(); String username =
+	 *                     user.getScreenName();
+	 * 
+	 *                     UploadPortletRequest uploadRequest = PortalUtil
+	 *                     .getUploadPortletRequest(actionRequest);
+	 * 
+	 *                     File uploadedFile = processInputFile(uploadRequest,
+	 *                     username, timestamp, appInput);
+	 * 
+	 *                     if (uploadedFile != null && uploadedFile.length() ==
+	 *                     0) { SessionErrors.add(actionRequest, "empty-file");
+	 *                     } else { String[] inputSandbox = null;
+	 * 
+	 *                     List<InputFile> inputFiles = new
+	 *                     ArrayList<InputFile>(); if (uploadedFile != null) {
+	 *                     InputFile inputFile = new InputFile();
+	 *                     inputFile.setName(uploadedFile.getName());
+	 * 
+	 *                     inputFiles.add(inputFile); // Path to the uploaded
+	 *                     file in the Liferay server inputSandbox = new
+	 *                     String[] { uploadedFile .getAbsolutePath() }; }
+	 * 
+	 *                     appInput.setInputFiles(inputFiles);
+	 * 
+	 *                     // this should be passed from the UI
+	 *                     appInput.getArguments()
+	 *                     .add("weka.classifiers.bayes.NaiveBayes"); for
+	 *                     (InputFile inputFile : inputFiles) {
+	 *                     appInput.getArguments().add(inputFile.getName()); }
+	 * 
+	 *                     _log.info(appInput);
+	 * 
+	 *                     FutureGatewayClient client = new FutureGatewayClient(
+	 *                     appPrefs.getFgHost(), appPrefs.getFgPort(),
+	 *                     appPrefs.getFgAPIVersion());
+	 * 
+	 *                     // 1. Create FG task Task t =
+	 *                     client.createTask(appInput, username); _log.info(t);
+	 *                     // if (t.getStatus().equals("WAITING") &&
+	 *                     inputSandbox != null) // { // // 2. upload input file
+	 *                     // String uploadPath = ""; // List<Link> links =
+	 *                     t.getLinks(); // for (Link link : links) { // if
+	 *                     (link.getRel().equals("input")) { // uploadPath =
+	 *                     link.getHref(); // break; // } // } // String t2 =
+	 *                     client.uploadFile(uploadPath, inputSandbox); //
+	 *                     _log.info(t2); // // /* // * TODO Check the FG
+	 *                     response to see if the file was correctly // *
+	 *                     uploaded --> "gestatus": "triggered" in the respose
+	 *                     notify // * user that task was correctly submitted
+	 *                     and he can check // * status on my-jobs page // // }
+	 *                     else { // // TODO Manage this condition // }
+	 * 
+	 *                     } } else { SessionErrors.add(actionRequest,
+	 *                     "wrong-fg-host"); }
+	 * 
+	 *                     // Hide default Liferay success/error messages
+	 *                     PortletConfig portletConfig = (PortletConfig)
+	 *                     actionRequest
+	 *                     .getAttribute(JavaConstants.JAVAX_PORTLET_CONFIG);
+	 *                     LiferayPortletConfig liferayPortletConfig =
+	 *                     (LiferayPortletConfig) portletConfig;
+	 *                     SessionMessages.add(actionRequest,
+	 *                     liferayPortletConfig.getPortletId() +
+	 *                     SessionMessages.
+	 *                     KEY_SUFFIX_HIDE_DEFAULT_ERROR_MESSAGE); }
 	 */
-	@ProcessAction(name = "submit")
-	public void submit(ActionRequest actionRequest,
-			ActionResponse actionResponse) throws IOException,
-			PortletException, NoSuchMethodException, SecurityException,
-			IllegalAccessException, IllegalArgumentException,
-			InvocationTargetException {
-
-		AppInput appInput = new AppInput();
-
-		// TODO: This should be replaced with a value taken from preferences.
-		// Represents the application identifier assigned to WEKA in the
-		// Futuregateway
-		appInput.setApplication(8);
-
-		// Just a description of the job, could passed from the JSP maybe.
-		appInput.setDescription("W");
-
-		PortletPreferences preferences = actionRequest.getPreferences();
-
-		String JSONAppPrefs = GetterUtil.getString(preferences.getValue(
-				Constants.APP_PREFERENCES, null));
-		AppPreferences appPrefs = Utils.getAppPreferences(JSONAppPrefs);
-
-		SimpleDateFormat dateFormat = new SimpleDateFormat(Constants.TS_FORMAT);
-		String timestamp = dateFormat.format(Calendar.getInstance().getTime());
-
-		ThemeDisplay themeDisplay = (ThemeDisplay) actionRequest
-				.getAttribute(WebKeys.THEME_DISPLAY);
-		User user = themeDisplay.getUser();
-		String username = user.getScreenName();
-
-		UploadPortletRequest uploadRequest = PortalUtil
-				.getUploadPortletRequest(actionRequest);
-
-		File uploadedFile = processInputFile(uploadRequest, username,
-				timestamp, appInput);
-
-		if (uploadedFile != null && uploadedFile.length() == 0) {
-			SessionErrors.add(actionRequest, "empty-file");
-		} else {
-			String[] inputSandbox = null;
-
-			List<InputFile> inputFiles = new ArrayList<InputFile>();
-			if (uploadedFile != null) {
-				InputFile inputFile = new InputFile();
-				inputFile.setName(uploadedFile.getName());
-
-				inputFiles.add(inputFile);
-				// Path to the uploaded file in the Liferay server
-				inputSandbox = new String[] { uploadedFile.getAbsolutePath() };
-			}
-
-			appInput.setInputFiles(inputFiles);
-
-			// this should be passed from the UI
-			appInput.getArguments().add("weka.classifiers.bayes.NaiveBayes");
-			for (InputFile inputFile : inputFiles) {
-				appInput.getArguments().add(inputFile.getName());
-			}
-
-			_log.info(appInput);
-
-			FutureGatewayClient client = new FutureGatewayClient();
-
-			// 1. Create FG task
-			Task t = client.createTask(appInput, username);
-			_log.info(t);
-			if (t.getStatus().equals("WAITING") && inputSandbox != null) {
-				// 2. upload input file
-				String uploadPath = "";
-				List<Link> links = t.getLinks();
-				for (Link link : links) {
-					if (link.getRel().equals("input")) {
-						uploadPath = link.getHref();
-						break;
-					}
-				}
-				String t2 = client.uploadFile(uploadPath, inputSandbox);
-				_log.info(t2);
-
-				/*
-				 * TODO Check the FG response to see if the file was correctly
-				 * uploaded --> "gestatus": "triggered" in the respose notify
-				 * user that task was correctly submitted and he can check
-				 * status on my-jobs page
-				 */
-			} else {
-				// TODO Manage this condition
-			}
-
-		}
-
-		// Hide default Liferay success/error messages
-		PortletConfig portletConfig = (PortletConfig) actionRequest
-				.getAttribute(JavaConstants.JAVAX_PORTLET_CONFIG);
-		LiferayPortletConfig liferayPortletConfig = (LiferayPortletConfig) portletConfig;
-		SessionMessages.add(actionRequest, liferayPortletConfig.getPortletId()
-				+ SessionMessages.KEY_SUFFIX_HIDE_DEFAULT_ERROR_MESSAGE);
-	}
 
 	/**
 	 * @param uploadRequest
 	 * @param username
 	 * @param timestamp
-	 * @param appInput
 	 * @return
 	 * @throws IOException
 	 */
 	private File processInputFile(UploadPortletRequest uploadRequest,
-			String username, String timestamp, AppInput appInput)
-			throws IOException {
+			String username, String timestamp) throws IOException {
 
 		File file = null;
 		String fileInputName = "fileupload";

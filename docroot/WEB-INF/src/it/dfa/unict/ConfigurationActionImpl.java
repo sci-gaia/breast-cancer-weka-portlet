@@ -89,7 +89,11 @@ public class ConfigurationActionImpl implements ConfigurationAction {
 				"pref_pilotScript", "");
 
 		appPreferences_new.setFgHost(fgHost);
-		appPreferences_new.setFgPort(fgPort);
+		if (fgPort == 0) {
+			appPreferences_new.setFgPort(Constants.HTTP_PORT);
+		} else {
+			appPreferences_new.setFgPort(fgPort);
+		}
 		appPreferences_new.setFgAPIVersion(fgAPIVersion);
 		appPreferences_new.setApplicationId(applicationId);
 		appPreferences_new.setPilotScript(pilotScript);

@@ -27,5 +27,7 @@ public final class Constants {
 	public static final String TS_FORMAT = "yyyyMMddHHmmss";
 
 	public static final String ROOT_FOLDER_NAME = "/tmp/";
+	
+	public static final int HTTP_PORT = 80;
 
 }
