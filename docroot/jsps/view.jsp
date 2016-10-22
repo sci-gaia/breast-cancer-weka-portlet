@@ -75,22 +75,28 @@
 				</c:when>
 				<c:otherwise>
 					<liferay-ui:section>
-						<portlet:actionURL name="classify" var="classify" />
-						<aui:form action="<%=classify%>" method="post">
+						<portlet:actionURL name="submit" var="submit" />
+						<aui:form action="<%=submit%>" method="post">
 							<aui:fieldset label="Classify">
 								<p>
 									From the uploaded <b><%=fileName%></b> file please select
 									available algorithm and experiment type to be used for Mining
 								</p>
-								<h3>Test type</h3>
-								<hr />
-								<aui:input name="Crossfield validation" value="test"
-									type="radio" />
-
-								<aui:input name="training set" type="radio" value="test" />
+								<aui:input name="fileName" type="hidden" label=""
+									value="<%=fileName%>" />
+								<aui:input name="filter" type="hidden" label=""
+									value="<%=filter%>" />
+								<aui:field-wrapper name="test-type-wrapper" label="Test type">
+									<aui:input checked="true" inlineLabel="right" name="test-type"
+										type="radio" value="crossfield-validation"
+										label="Crossfield validation" />
+									<aui:input inlineLabel="right" name="test-type" type="radio"
+										value="training-set" label="Training set" />
+								</aui:field-wrapper>
 								<hr />
 								<aui:select label="Classifier" name="clasify">
-									<aui:option label="Naive Bayes" value="naivebayes" />
+									<aui:option label="Naive Bayes"
+										value="weka.classifiers.bayes.NaiveBayes" />
 								</aui:select>
 								<br />
 
@@ -114,7 +120,6 @@
 
 <aui:script>
 	AUI().use('node', function(A) {
-		console.log("CIAO");
 		A.one('#<portlet:namespace/>fileupload').on('change', function(event) {
 			A.one('#<portlet:namespace/>continue').set('type', 'submit');
 		});

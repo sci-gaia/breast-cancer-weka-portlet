@@ -1,24 +1,17 @@
 package it.dfa.unict;
 
-import it.dfa.unict.pojo.AppInput;
 import it.dfa.unict.pojo.InputFile;
-import it.dfa.unict.pojo.Task;
 import it.dfa.unict.util.Constants;
-import it.dfa.unict.util.Utils;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletException;
-import javax.portlet.PortletPreferences;
 import javax.portlet.ProcessAction;
 
 import com.liferay.portal.kernel.log.Log;
@@ -28,7 +21,6 @@ import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.kernel.util.FileUtil;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -99,6 +91,13 @@ public class WekaAppPortlet extends MVCPortlet {
 		LiferayPortletConfig liferayPortletConfig = (LiferayPortletConfig) portletConfig;
 		SessionMessages.add(actionRequest, liferayPortletConfig.getPortletId()
 				+ SessionMessages.KEY_SUFFIX_HIDE_DEFAULT_ERROR_MESSAGE);
+	}
+
+	@ProcessAction(name = "submit")
+	public void submit(ActionRequest actionRequest,
+			ActionResponse actionResponse) {
+
+		actionResponse.setRenderParameter("jspPage", "/jsps/submit.jsp");
 	}
 
 	/**

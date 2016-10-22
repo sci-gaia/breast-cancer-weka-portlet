@@ -18,18 +18,16 @@
 <aui:layout>
 	<aui:column columnWidth="50" first="true">
 		<img src="<%=request.getContextPath()%>/images/AppLogo.png"
-			height="100%" width="100%" />
-		<aui:button id="view" name="view" value="perform-again"
-			onClick="<%= viewUrl %>" />
+			height="50%" width="50%" />
 	</aui:column>
 	<aui:column columnWidth="50" last="true">
-		<%=text1%>		
+		<%=text1%>
 		<b><%=jobLabel%></b>
 		<br />
 		<br />
 		<%=myJobs%>
 		<a href="/my-jobs">MyJobs</a>.
 	</aui:column>
-
 </aui:layout>
-
+<aui:button id="view" name="view" value="perform-again"
+	onClick="<%= viewUrl %>" />
