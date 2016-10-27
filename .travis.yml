@@ -46,9 +46,9 @@ before_install:
  - cp util-*.jar ${INSTALL_ROOT}/glassfish-3.1.2/domains/domain1/lib/
 
 
-# Building the template-portlet
+# Building the breast-cancer-weka-portlet
 install:
- - cd liferay-plugins-sdk-6.1.1/portlets/template-portlet
+ - cd liferay-plugins-sdk-6.1.1/portlets/breast-cancer-weka-portlet
  - sudo ant all
 
 notifications:
