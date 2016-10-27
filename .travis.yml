@@ -40,12 +40,15 @@ before_install:
  - sudo cp ecj.jar /usr/share/ant/lib/
 
 # Copy utils-*.jar to lib/ folder
- - cp ${INSTALL_ROOT}/glassfish-3.1.2/domains/domain1/applications/liferay-portal/WEB-INF/lib/util-* ${INSTALL_ROOT}/glassfish-3.1.2/domains/domain1/lib/
+ - wget http://central.maven.org/maven2/com/liferay/portal/util-taglib/6.1.1/util-taglib-6.1.1.jar
+ - wget http://central.maven.org/maven2/com/liferay/portal/util-java/6.1.1/util-java-6.1.1.jar
+ - wget http://central.maven.org/maven2/com/liferay/portal/util-bridges/6.1.1/util-bridges-6.1.1.jar
+ - cp util-*.jar ${INSTALL_ROOT}/glassfish-3.1.2/domains/domain1/lib/
 
 
 # Building the template-portlet
 install:
- - cd liferay-plugins-sdk-6.1.1/portlets/breast-cancer-weka-portlet
+ - cd liferay-plugins-sdk-6.1.1/portlets/template-portlet
  - sudo ant all
 
 notifications:
