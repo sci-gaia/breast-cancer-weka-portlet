@@ -1,3 +1,3 @@
-# breast-cancer-weka-portlet
+# Breast Cancer analisys with WEKA
 ------------------
 Sci-Gaia Summer school
