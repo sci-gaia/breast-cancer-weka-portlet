@@ -2,7 +2,6 @@ language: java
 
 jdk:
  - oraclejdk7
- - oraclejdk8
 
 before_install:
  - sudo apt-get update -qq
@@ -44,12 +43,13 @@ before_install:
  - wget http://central.maven.org/maven2/com/liferay/portal/util-taglib/6.1.1/util-taglib-6.1.1.jar
  - wget http://central.maven.org/maven2/com/liferay/portal/util-java/6.1.1/util-java-6.1.1.jar
  - wget http://central.maven.org/maven2/com/liferay/portal/util-bridges/6.1.1/util-bridges-6.1.1.jar
- - wget http://central.maven.org/maven2/com/sun/jersey/jersey-client/1.19.2/jersey-client-1.19.2.jar
- - wget http://central.maven.org/maven2/com/sun/jersey/jersey-core/1.19.2/jersey-core-1.19.2.jar
- - wget http://central.maven.org/maven2/com/sun/jersey/jersey-json/1.19.2/jersey-json-1.19.2.jar
- - wget http://central.maven.org/maven2/com/sun/jersey/contribs/jersey-multipart/1.19.2/jersey-multipart-1.19.2.jar
- - cp *.jar ${INSTALL_ROOT}/glassfish-3.1.2/domains/domain1/lib/
+ - cp util-*.jar ${INSTALL_ROOT}/glassfish-3.1.2/domains/domain1/lib/
 
+# Copy jersey-*.jar to lib/ folder
+ - cp ${INSTALL_ROOT}/glassfish-3.1.2/modules/jersey-client.jar ${INSTALL_ROOT}/glassfish-3.1.2/domains/domain1/lib/
+ - cp ${INSTALL_ROOT}/glassfish-3.1.2/modules/jersey-core.jar ${INSTALL_ROOT}/glassfish-3.1.2/domains/domain1/lib/
+ - cp ${INSTALL_ROOT}/glassfish-3.1.2/modules/jersey-json.jar ${INSTALL_ROOT}/glassfish-3.1.2/domains/domain1/lib/
+ - cp ${INSTALL_ROOT}/glassfish-3.1.2/modules/jersey-multipart.jar ${INSTALL_ROOT}/glassfish-3.1.2/domains/domain1/lib/
 
 # Building the breast-cancer-weka-portlet
 install:
