@@ -3,14 +3,14 @@
 
 <liferay-portlet-app>
 	<portlet>
-		<portlet-name>WEKA-portlet</portlet-name>
+		<portlet-name>breast-cancer-weka-portlet</portlet-name>
 
 		<icon>/icon.png</icon>
 		<configuration-action-class>it.dfa.unict.ConfigurationActionImpl</configuration-action-class>
 		<instanceable>false</instanceable>
 		<header-portlet-css>/css/main.css</header-portlet-css>
 		<footer-portlet-javascript>/js/main.js</footer-portlet-javascript>
-		<css-class-wrapper>WEKA-portlet</css-class-wrapper>
+		<css-class-wrapper>breast-cancer-weka-portlet</css-class-wrapper>
 
 	</portlet>
 	<role-mapper>

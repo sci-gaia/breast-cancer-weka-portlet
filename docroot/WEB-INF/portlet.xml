@@ -5,12 +5,9 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd"
 	version="2.0">
 	<portlet>
-		<portlet-name>WEKA-portlet</portlet-name>
-
-		<display-name>WEKA Portlet</display-name>
-
+		<portlet-name>breast-cancer-weka-portlet</portlet-name>
+		<display-name>Breast Cancer analysis with weka</display-name>
 		<portlet-class>it.dfa.unict.WekaAppPortlet</portlet-class>
-
 		<init-param>
 			<name>view-jsp</name>
 			<value>/jsps/view.jsp</value>
@@ -30,12 +27,9 @@
 		</supports>
 		<resource-bundle>Language</resource-bundle>
 		<portlet-info>
-		<title>WEKA Portlet</title>
-
-		<short-title>WEKA Portlet</short-title>
-
-		<keywords>WEKA Portlet</keywords>
-
+			<title>Breast Cancer analysis with weka</title>
+			<short-title>Breast Cancer analysis with weka</short-title>
+			<keywords>Breast Cancer analysis with weka</keywords>
 		</portlet-info>
 		<security-role-ref>
 			<role-name>administrator</role-name>

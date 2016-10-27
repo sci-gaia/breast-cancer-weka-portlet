@@ -3,6 +3,6 @@
 
 <display>
 	<category name="Sci-GaIA">
-		<portlet id="WEKA-portlet" />
+		<portlet id="breast-cancer-weka-portlet" />
 	</category>
 </display>
