@@ -18,7 +18,7 @@
 <aui:layout>
 	<aui:column columnWidth="50" first="true">
 		<img src="<%=request.getContextPath()%>/images/AppLogo.png"
-			height="50%" width="50%" />
+			height="30%" width="30%" align="middle"/>
 	</aui:column>
 	<aui:column columnWidth="50" last="true">
 		<%=text1%>

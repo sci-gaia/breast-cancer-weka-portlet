@@ -35,7 +35,7 @@
 <aui:layout>
 	<aui:column columnWidth="50" first="true">
 		<img src="<%=request.getContextPath()%>/images/AppLogo.png"
-			height="50%" width="50%" />
+			height="30%" width="30%" align="middle" />
 	</aui:column>
 	<aui:column columnWidth="50" last="true">
 		<%=LanguageUtil.get(portletConfig,
@@ -83,7 +83,7 @@
 									available algorithm and experiment type to be used for Mining
 								</p>
 								<aui:input name="fileName" type="hidden" label=""
-									value="<%=fileName%>" />
+									value="<%=filePath%>" />
 								<aui:input name="filter" type="hidden" label=""
 									value="<%=filter%>" />
 								<aui:field-wrapper name="test-type-wrapper" label="Test type">
@@ -94,7 +94,7 @@
 										value="training-set" label="Training set" />
 								</aui:field-wrapper>
 								<hr />
-								<aui:select label="Classifier" name="clasify">
+								<aui:select label="Classifier" name="classifier">
 									<aui:option label="Naive Bayes"
 										value="weka.classifiers.bayes.NaiveBayes" />
 								</aui:select>
@@ -120,9 +120,12 @@
 
 <aui:script>
 	AUI().use('node', function(A) {
-		A.one('#<portlet:namespace/>fileupload').on('change', function(event) {
-			A.one('#<portlet:namespace/>continue').set('type', 'submit');
-		});
+		var fileUploadBtn = A.one('#<portlet:namespace/>fileupload');
+		if (fileUploadBtn !== null) {
+			A.one('#<portlet:namespace/>fileupload').on('change', function(event) {
+				A.one('#<portlet:namespace/>continue').set('type', 'submit');
+			});
+		}
 	});
 
 	

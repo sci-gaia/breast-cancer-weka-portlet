@@ -12,6 +12,8 @@ import javax.ws.rs.core.MediaType;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
@@ -23,6 +25,8 @@ import com.sun.jersey.multipart.FormDataMultiPart;
 import com.sun.jersey.multipart.file.FileDataBodyPart;
 
 public class FutureGatewayClient {
+	
+	private final Log _log = LogFactoryUtil.getLog(FutureGatewayClient.class);
 
 	private String fgEndpoint;
 	private String fgApiversion;
@@ -92,7 +96,7 @@ public class FutureGatewayClient {
 				.accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
 
 		if (response.getStatus() != 200) {
-			System.out.println("*****" + apiResource);
+			_log.debug(apiResource);
 			throw new RuntimeException("Failed : HTTP error code : "
 					+ response.getStatus());
 		}
@@ -110,7 +114,7 @@ public class FutureGatewayClient {
 			}
 		}
 		
-		System.out.println("*****" +uploadPath.replace("/v1.0", ""));
+		_log.debug(uploadPath.replace("/v1.0", ""));
 		
 		ClientResponse response = apiResource.path(uploadPath.replace("/v1.0", ""))
 				.accept(MediaType.APPLICATION_JSON)
