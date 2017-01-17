@@ -97,6 +97,12 @@
 								<aui:select label="Classifier" name="classifier">
 									<aui:option label="Naive Bayes"
 										value="weka.classifiers.bayes.NaiveBayes" />
+									<aui:option label="k-Nearest Neighbors"
+										value="weka.classifiers.lazy.IBk" />
+									<aui:option label="Decision Tree( C4.5)"
+										value="weka.classifiers.trees.J48" />
+									<aui:option label="Support Vector Machines"
+										value="weka.classifiers.functions.SMO" />	
 								</aui:select>
 								<br />
 
